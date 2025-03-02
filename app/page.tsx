@@ -94,8 +94,7 @@ export default function Chat() {
                 className="font-medium underline underline-offset-4 transition-colors hover:text-black"
               >
                 Halim Madi
-              </a>.
-              I was built using{" "}
+              </a>. I was built using{" "}
               <a
                 href="https://openai.com/blog/gpt-3-5-turbo-fine-tuning-and-api-updates"
                 target="_blank"
@@ -103,6 +102,7 @@ export default function Chat() {
                 className="font-medium underline underline-offset-4 transition-colors hover:text-black"
               >
                 fine-tuned GPT4.
+              </a>
             </p>
           </div>
           <div className="flex flex-col space-y-4 border-t border-gray-200 bg-gray-50 p-7 sm:p-10">
