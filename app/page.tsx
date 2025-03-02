@@ -14,9 +14,9 @@ import Textarea from "react-textarea-autosize";
 import Image from "next/image";
 
 const examples = [
-  "Hi",
-  "I'm Amy, how's John doing today?",
-  "Alan, don't forget our appointment tomorrow.",
+  "Example 1",
+  "Example 2",
+  "Example 3",
 ];
 
 export default function Chat() {
@@ -37,20 +37,6 @@ export default function Chat() {
   return (
     <main className="flex flex-col items-center justify-between pb-40">
       <div className="absolute top-5 hidden w-full justify-between px-5 sm:flex">
-        <a
-          href="https://www.oulipo.xyz"
-          target="_blank"
-          className="rounded-lg p-2 transition-colors duration-200 hover:bg-stone-100 sm:bottom-auto"
-        >
-          <VercelIcon />
-        </a>
-        <a
-          href="https://github.com/madihg/scam-ai-poet"
-          target="_blank"
-          className="rounded-lg p-2 transition-colors duration-200 hover:bg-stone-100 sm:bottom-auto"
-        >
-          <GithubIcon />
-        </a>
       </div>
       {messages.length > 0 ? (
         messages.map((message, i) => (
@@ -73,8 +59,8 @@ export default function Chat() {
                   <UserIcon />
                 ) : (
                   <Image
-                    src="/scam-poet.png"
-                    alt="scam-poet"
+                    src="/sample-image.png"
+                    alt="sample-image"
                     width={36}
                     height={36}
                   />
@@ -90,24 +76,24 @@ export default function Chat() {
         <div className="border-gray-200sm:mx-0 mx-5 mt-20 max-w-screen-md rounded-md border sm:w-full">
           <div className="flex flex-col space-y-4 p-7 sm:p-10">
             <Image
-              src="/scam-poet.png"
-              alt="scam-poet"
+              src="/sample-image.png"
+              alt="sample-image"
               width={40}
               height={40}
               className="h-20 w-20"
             />
             <h1 className="text-lg font-semibold text-black">
-              Hi, I'm an AI clone of Halim!
+              Hi, I'm a fine tuned LLM.
             </h1>
             <p className="text-gray-500">
-              I'm part of a series of computational poetry experiments called{" "}
+              I'm part of a series of computational experiments taught by{" "}
               <a
-                href="https://www.oulipo.xyz"
+                href="https://linkin.bio/yallahalim/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-medium underline underline-offset-4 transition-colors hover:text-black"
               >
-                Oulipo.xyz
+                Halim Madi
               </a>.
               I was built using{" "}
               <a
@@ -116,17 +102,7 @@ export default function Chat() {
                 rel="noopener noreferrer"
                 className="font-medium underline underline-offset-4 transition-colors hover:text-black"
               >
-                GPT-4 fine-tuned
-              </a>{" "}
-              on poems from the book{" "}
-              <a
-                href="https://www.amazon.com/Invasions-Poetry-Strike-Robotexts-Halims/dp/B0C644BZRZ"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-medium underline underline-offset-4 transition-colors hover:text-black"
-              >
-                Invasions by Halim
-              </a>.
+                fine-tuned GPT4.
             </p>
           </div>
           <div className="flex flex-col space-y-4 border-t border-gray-200 bg-gray-50 p-7 sm:p-10">
@@ -207,16 +183,16 @@ export default function Chat() {
             rel="noopener noreferrer"
             className="transition-colors hover:text-black"
           >
-            OpenAI GPT-3.5-turbo, and fine-tuned
+            OpenAI GPT-3.5-turbo, as part of a course taught by
           </a>{" "}
-          on Halim's poetry.{" "}
+          Halim Madi.{" "}
           <a
-            href="https://github.com/madihg/scam-ai-poet"
+            href="https://linkin.bio/yallahalim/"
             target="_blank"
             rel="noopener noreferrer"
             className="transition-colors hover:text-black"
           >
-            View the repo
+            Learn to build your own
           </a>
           .
         </p>
