@@ -65,6 +65,7 @@ export default function Chat() {
   const [messagePosition, setMessagePosition] = useState<"left" | "right">("right");
   const [responseOpacity, setResponseOpacity] = useState<number>(1);
   const [lastResponseComplete, setLastResponseComplete] = useState<boolean>(true);
+  const [messageVisible, setMessageVisible] = useState<boolean>(false);
   const [randomizedButtons, setRandomizedButtons] = useState([
     { text: `And then Almitra said, speak to us of ${prophetSubjects[Math.floor(Math.random() * prophetSubjects.length)]}`, imagePath: "/button-images/button1.jpg" },
     { text: `And then Almitra said, speak to us of ${prophetSubjects[Math.floor(Math.random() * prophetSubjects.length)]}`, imagePath: "/button-images/button2.jpg" },
@@ -107,10 +108,12 @@ export default function Chat() {
     }
   }, [responseOpacity]);
   
-  // Debug helper to log state changes
+  // Display message flag update when chat messages change
   useEffect(() => {
-    console.log("Response state changed:", { responseOpacity, lastResponseComplete, isLoading });
-  }, [responseOpacity, lastResponseComplete, isLoading]);
+    if (chatMessages.length > 0) {
+      setMessageVisible(true);
+    }
+  }, [chatMessages]);
   
   // Randomize button subjects when response fades away
   useEffect(() => {
@@ -125,7 +128,7 @@ export default function Chat() {
 
   // Function to handle button clicks - simplified to ensure it always triggers a response
   const handleButtonClick = (option: string) => {
-    if (isLoading || !lastResponseComplete) return; // Prevent clicks while loading or response not complete
+    if (isLoading) return; // Only prevent clicks while loading
     
     setInput(option);
     // Randomize message position
@@ -134,10 +137,27 @@ export default function Chat() {
     // Start loading animation
     animateProphetMessages();
     
+    // Set message as visible
+    setMessageVisible(true);
+    
     // Submit the form with a small delay to ensure everything is set
     setTimeout(() => {
       formRef.current?.requestSubmit();
     }, 50);
+  };
+  
+  // Function to reset the UI and enable new interactions
+  const handleReset = () => {
+    setLastResponseComplete(true);
+    setResponseOpacity(0);
+    setMessageVisible(false);
+    
+    // Randomize new button subjects
+    setRandomizedButtons([
+      { text: `And then Almitra said, speak to us of ${prophetSubjects[Math.floor(Math.random() * prophetSubjects.length)]}`, imagePath: "/button-images/button1.jpg" },
+      { text: `And then Almitra said, speak to us of ${prophetSubjects[Math.floor(Math.random() * prophetSubjects.length)]}`, imagePath: "/button-images/button2.jpg" },
+      { text: `And then Almitra said, speak to us of ${prophetSubjects[Math.floor(Math.random() * prophetSubjects.length)]}`, imagePath: "/button-images/button3.jpg" },
+    ]);
   };
 
   // Function to animate prophet messages at the top of the page
@@ -214,13 +234,15 @@ export default function Chat() {
       <div className="absolute top-5 hidden w-full justify-between px-5 sm:flex">
       </div>
       
-      {/* Prophet message at the top of the page */}
+      {/* Prophet message above the welcome image */}
       {loadingMessage && (
         <div 
-          className="fixed top-10 left-0 right-0 mx-auto z-50 text-center transition-opacity duration-1000 mt-8"
+          className="fixed top-20 left-0 right-0 mx-auto z-50 text-center transition-opacity duration-1000"
           style={{ opacity: loadingOpacity }}
         >
-          <div className="whitespace-pre-line text-3xl">{loadingMessage}</div>
+          <div className="inline-block bg-white border border-black p-4">
+            <div className="whitespace-pre-line text-2xl">{loadingMessage}</div>
+          </div>
         </div>
       )}
       
@@ -271,30 +293,44 @@ export default function Chat() {
           />
           
           {/* Buttons with images instead of text - no container border */}
-          <div className="flex flex-wrap gap-5 justify-center">
-            {randomizedButtons.map((option, i) => (
+          <div className="flex flex-col items-center gap-5">
+            {/* Reset button */}
+            {messageVisible && (
               <button
-                key={i}
                 type="button"
-                className={clsx(
-                  "p-0 transition-all overflow-hidden",
-                  (isLoading || (responseOpacity > 0 && !lastResponseComplete)) ? "cursor-not-allowed opacity-50" : "hover:opacity-90"
-                )}
-                onClick={() => handleButtonClick(option.text)}
-                disabled={isLoading || (responseOpacity > 0 && !lastResponseComplete)}
-                aria-label={option.text}
+                className="mb-4 py-2 px-6 bg-white text-black border border-black hover:bg-gray-100 transition-all"
+                onClick={handleReset}
               >
-                <div className="border border-black">
-                  <Image 
-                    src={option.imagePath}
-                    alt={option.text}
-                    width={120}
-                    height={80}
-                    className="w-full h-auto"
-                  />
-                </div>
+                kneel, gift, pray again
               </button>
-            ))}
+            )}
+            
+            {/* Main image buttons */}
+            <div className="flex flex-wrap gap-5 justify-center">
+              {randomizedButtons.map((option, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  className={clsx(
+                    "p-0 transition-all overflow-hidden",
+                    isLoading ? "cursor-not-allowed opacity-50" : "hover:opacity-90"
+                  )}
+                  onClick={() => handleButtonClick(option.text)}
+                  disabled={isLoading}
+                  aria-label={option.text}
+                >
+                  <div className="border border-black">
+                    <Image 
+                      src={option.imagePath}
+                      alt={option.text}
+                      width={120}
+                      height={80}
+                      className="w-full h-auto"
+                    />
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
         </form>
       </div>
