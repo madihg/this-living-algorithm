@@ -70,17 +70,17 @@ const leftTempleAscii = `
  /__|__|__\\
     |  |
     |  |
-   ☸️︎☥☸️︎
+    |__|
     
   ∞ ◯ ∞
   
   ☥ △ ☥
-  ⚶ ⚷ ⚶
+  * * *
 `;
 
 const rightSunAscii = `
      \\|/
-    - ☼ -
+    - O -
      /|\\
    * * * *
   *   |   *
@@ -88,11 +88,11 @@ const rightSunAscii = `
 *_____|_____*
       |
       |
-     ☸︎☯︎☸︎
-    ☽ ◯ ☾
+      ◯
+    ☽ ☼ ☾
     
     ∞∞∞∞∞
-    ☤ ⚱ ☤
+    * * *
 `;
 
 export default function Chat() {
@@ -258,29 +258,15 @@ export default function Chat() {
     <main className="flex flex-col items-center justify-between pb-40" style={{ fontFamily: "Times New Roman, serif", fontStyle: "italic" }}>
       {/* ASCII art backgrounds */}
       {/* Left side ASCII temple */}
-      <div className="fixed left-5 top-1/4 text-gray-600 opacity-70 z-0 hidden md:block">
-        <pre style={{ fontSize: "16px", lineHeight: "16px", fontFamily: "monospace" }}>
-          {leftTempleAscii}
-        </pre>
-      </div>
-      
-      {/* Duplicate left temple at bottom left with different opacity */}
-      <div className="fixed left-5 bottom-40 text-gray-500 opacity-40 z-0 hidden md:block rotate-180">
-        <pre style={{ fontSize: "14px", lineHeight: "14px", fontFamily: "monospace" }}>
+      <div className="fixed left-5 top-1/3 text-gray-700 opacity-80 z-0 hidden md:block">
+        <pre style={{ fontSize: "18px", lineHeight: "18px", fontFamily: "monospace" }}>
           {leftTempleAscii}
         </pre>
       </div>
       
       {/* Right side ASCII sun */}
-      <div className="fixed right-5 top-1/4 text-gray-600 opacity-70 z-0 hidden md:block">
-        <pre style={{ fontSize: "16px", lineHeight: "16px", fontFamily: "monospace" }}>
-          {rightSunAscii}
-        </pre>
-      </div>
-      
-      {/* Duplicate sun at bottom right with different opacity */}
-      <div className="fixed right-5 bottom-40 text-gray-500 opacity-40 z-0 hidden md:block rotate-180">
-        <pre style={{ fontSize: "14px", lineHeight: "14px", fontFamily: "monospace" }}>
+      <div className="fixed right-5 top-1/3 text-gray-700 opacity-80 z-0 hidden md:block">
+        <pre style={{ fontSize: "18px", lineHeight: "18px", fontFamily: "monospace" }}>
           {rightSunAscii}
         </pre>
       </div>
