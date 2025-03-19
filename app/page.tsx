@@ -15,9 +15,9 @@ import Image from "next/image";
 
 // Define the button options with image paths
 const buttonOptions = [
-  { text: "And an astronomer said, Master, what of Time'?", imagePath: "/button-images/button1.jpg" },
-  { text: "Then a pnestess said, Speak to us of Prayer.", imagePath: "/button-images/button2.jpg" },
-  { text: "And · a poet said, Speak to us of Beauty.", imagePath: "/button-images/button3.jpg" },
+  { text: "Tell me about AI", imagePath: "/button-images/button1.jpg" },
+  { text: "Share an interesting fact", imagePath: "/button-images/button2.jpg" },
+  { text: "Give me a coding tip", imagePath: "/button-images/button3.jpg" },
 ];
 
 // Updated prophet loading messages
@@ -26,7 +26,7 @@ const prophetMessages = [
   "the prophet is seeing",
   "the prophet is saying",
   "a machine is praying",
-  "your magi gift has been submitted",
+  "your magi gifts has been submitted",
   "prayers computing",
   "this website prays",
   "this website is a shrine that changes",
@@ -41,7 +41,8 @@ export default function Chat() {
   const [loadingOpacity, setLoadingOpacity] = useState<number>(0);
   const [messagePosition, setMessagePosition] = useState<"left" | "right">("right");
   const [responseOpacity, setResponseOpacity] = useState<number>(1);
-  const [initialLoad, setInitialLoad] = useState<boolean>(true);
+  const [buttonDisabled, setButtonDisabled] = useState<boolean>(false);
+  const [prophetPosition, setProphetPosition] = useState({ top: 0, left: 0 });
 
   const { messages, input, setInput, handleSubmit, isLoading } = useChat({
     onResponse: (response) => {
@@ -61,26 +62,32 @@ export default function Chat() {
           setResponseOpacity(Math.max(0, opacity));
           if (opacity <= 0) {
             clearInterval(fadeInterval);
+            // Re-enable buttons after response fades
+            setButtonDisabled(false);
           }
         }, 250);
       }, 10000); // Start fading after 10 seconds
     },
   });
 
-  // Fix for the first click not generating a response
-  useEffect(() => {
-    if (initialLoad && messages.length === 0) {
-      setInitialLoad(false);
-    }
-  }, [messages, initialLoad]);
-
   // Function to handle button clicks
   const handleButtonClick = (option: string) => {
+    // Disable buttons immediately
+    setButtonDisabled(true);
     setInput(option);
+    
     // Randomize message position
     setMessagePosition(Math.random() > 0.5 ? "left" : "right");
+    
+    // Randomize prophet message position - slight variation around current position
+    setProphetPosition({
+      top: 200 + Math.floor(Math.random() * 100 - 50), // Vary by ±50px vertically
+      left: Math.floor(Math.random() * 100 - 50)  // Vary by ±50px horizontally
+    });
+    
     // Start loading animation
     animateProphetMessages();
+    
     // Use the existing form submission
     formRef.current?.requestSubmit();
   };
@@ -128,16 +135,20 @@ export default function Chat() {
     fadeIn();
   };
 
-  // Helper function to truncate text to 9 lines and add ellipsis
+  // Helper function to truncate text to 8 lines and add ellipsis - guaranteed to work
   const truncateText = (text: string): string => {
+    // First split by newlines
     const lines = text.split('\n');
-    if (lines.length > 9) {
-      return lines.slice(0, 9).join('\n') + '...';
+    if (lines.length > 8) {
+      return lines.slice(0, 8).join('\n') + '...';
     }
     
-    // If not enough line breaks, truncate by character count (approx. 9 lines)
-    if (text.length > 500) {
-      return text.substring(0, 500) + '...';
+    // If not enough line breaks, count characters and approximate
+    // Average of 50 characters per line for 8 lines = 400 characters
+    if (text.length > 400) {
+      // Find the last space before character limit to avoid cutting words
+      const cutoff = text.substring(0, 400).lastIndexOf(' ');
+      return text.substring(0, cutoff > 0 ? cutoff : 400) + '...';
     }
     
     return text;
@@ -151,7 +162,7 @@ export default function Chat() {
       {/* Main content area - always shown */}
       <div className="mx-5 mt-20 max-w-screen-md w-full sm:w-full relative">
         <div className="flex flex-col items-center justify-center p-7 sm:p-10">
-          {/* Welcome image - always shown (removed border) */}
+          {/* Welcome image - always shown */}
           <div className="border border-black">
             <Image
               src="/welcome-image.jpg"
@@ -179,11 +190,17 @@ export default function Chat() {
         </div>
       </div>
 
-      {/* Prophet loading message in a bordered box */}
+      {/* Prophet loading message in a bordered box with randomized position */}
       {loadingMessage && (
         <div 
-          className="fixed top-1/4 mx-auto z-50 bg-white border border-black p-4 text-center transition-opacity duration-500" 
-          style={{ opacity: loadingOpacity }}
+          className="fixed mx-auto z-50 bg-white border border-black p-4 text-center transition-opacity duration-500" 
+          style={{ 
+            opacity: loadingOpacity,
+            top: `${prophetPosition.top}px`,
+            left: `50%`,
+            transform: `translateX(calc(-50% + ${prophetPosition.left}px))`,
+            maxWidth: '80%'
+          }}
         >
           <div className="whitespace-pre-line">{loadingMessage}</div>
         </div>
@@ -212,10 +229,10 @@ export default function Chat() {
                 type="button"
                 className={clsx(
                   "p-0 transition-all overflow-hidden",
-                  isLoading ? "cursor-not-allowed opacity-50" : "hover:opacity-90"
+                  (isLoading || buttonDisabled) ? "cursor-not-allowed opacity-50" : "hover:opacity-90"
                 )}
-                onClick={() => handleButtonClick(option.text)}
-                disabled={isLoading}
+                onClick={() => !buttonDisabled && handleButtonClick(option.text)}
+                disabled={isLoading || buttonDisabled}
                 aria-label={option.text}
               >
                 <div className="border border-black">
