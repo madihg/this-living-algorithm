@@ -13,11 +13,11 @@ import {
 import Textarea from "react-textarea-autosize";
 import Image from "next/image";
 
-// Define the button options
+// Define the button options with image paths
 const buttonOptions = [
-  "Tell me about AI",
-  "Share an interesting fact",
-  "Give me a coding tip",
+  { text: "Tell me about AI", imagePath: "/button-images/button1.png" },
+  { text: "Share an interesting fact", imagePath: "/button-images/button2.png" },
+  { text: "Give me a coding tip", imagePath: "/button-images/button3.png" },
 ];
 
 export default function Chat() {
@@ -43,7 +43,7 @@ export default function Chat() {
   };
 
   return (
-    <main className="flex flex-col items-center justify-between pb-40">
+    <main className="flex flex-col items-center justify-between pb-40" style={{ fontFamily: "Times New Roman, serif", fontStyle: "italic" }}>
       <div className="absolute top-5 hidden w-full justify-between px-5 sm:flex">
       </div>
       {messages.length > 0 ? (
@@ -82,47 +82,15 @@ export default function Chat() {
         ))
       ) : (
         <div className="border-gray-200sm:mx-0 mx-5 mt-20 max-w-screen-md rounded-md border sm:w-full">
-          <div className="flex flex-col space-y-4 p-7 sm:p-10">
+          <div className="flex flex-col items-center justify-center p-7 sm:p-10">
+            {/* Replaced text with a placeholder image */}
             <Image
-              src="/sample-image.png"
-              alt="sample-image"
-              width={40}
-              height={40}
-              className="h-20 w-20"
+              src="/welcome-image.png"
+              alt="Welcome"
+              width={400}
+              height={300}
+              className="w-full max-w-md"
             />
-            <h1 className="text-lg font-semibold text-black">
-              Hi, I'm a fine tuned LLM.
-            </h1>
-            <p className="text-gray-500">
-              I'm part of a series of computational experiments taught by{" "}
-              <a
-                href="https://linkin.bio/yallahalim/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-medium underline underline-offset-4 transition-colors hover:text-black"
-              >
-                Halim Madi
-              </a>. I was built using{" "}
-              <a
-                href="https://openai.com/blog/gpt-3-5-turbo-fine-tuning-and-api-updates"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-medium underline underline-offset-4 transition-colors hover:text-black"
-              >
-                fine-tuned GPT4.
-              </a>
-            </p>
-          </div>
-          <div className="flex flex-col space-y-4 border-t border-gray-200 bg-gray-50 p-7 sm:p-10">
-            {buttonOptions.map((option, i) => (
-              <button
-                key={i}
-                className="rounded-md border border-gray-200 bg-white px-5 py-3 text-left text-sm text-gray-500 transition-all duration-75 hover:border-black hover:text-gray-700 active:bg-gray-50"
-                onClick={() => handleButtonClick(option)}
-              >
-                {option}
-              </button>
-            ))}
           </div>
         </div>
       )}
@@ -130,7 +98,8 @@ export default function Chat() {
         <form
           ref={formRef}
           onSubmit={handleSubmit}
-          className="relative w-full max-w-screen-md rounded-xl border border-gray-200 bg-white px-4 py-4 shadow-lg"
+          className="relative w-full max-w-screen-md py-4 shadow-lg" 
+          // Removed border class to remove text input border
         >
           {/* Hidden textarea to maintain form functionality */}
           <textarea
@@ -140,56 +109,32 @@ export default function Chat() {
             className="hidden"
           />
           
-          {/* Buttons instead of visible input */}
-          <div className="flex flex-wrap gap-3 justify-center">
+          {/* Buttons with images instead of text */}
+          <div className="flex flex-wrap gap-5 justify-center">
             {buttonOptions.map((option, i) => (
               <button
                 key={i}
                 type="button"
                 className={clsx(
-                  "px-4 py-3 rounded-md font-medium transition-all",
-                  isLoading
-                    ? "cursor-not-allowed bg-gray-100 text-gray-400"
-                    : "bg-green-500 text-white hover:bg-green-600",
+                  "p-0 rounded-md transition-all overflow-hidden",
+                  isLoading ? "cursor-not-allowed opacity-50" : "hover:opacity-90"
                 )}
-                onClick={() => handleButtonClick(option)}
+                onClick={() => handleButtonClick(option.text)}
                 disabled={isLoading}
+                aria-label={option.text}
               >
-                {option}
+                <Image 
+                  src={option.imagePath}
+                  alt={option.text}
+                  width={120}
+                  height={80}
+                  className="w-full h-auto"
+                />
               </button>
             ))}
           </div>
         </form>
-        <p className="text-center text-xs text-gray-400">
-          Built with{" "}
-          <a
-            href="https://sdk.vercel.ai/docs"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="transition-colors hover:text-black"
-          >
-            Vercel AI SDK
-          </a>
-          ,{" "}
-          <a
-            href="https://openai.com/blog/gpt-3-5-turbo-fine-tuning-and-api-updates"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="transition-colors hover:text-black"
-          >
-            OpenAI GPT-3.5-turbo, as part of a course taught by
-          </a>{" "}
-          Halim Madi.{" "}
-          <a
-            href="https://linkin.bio/yallahalim/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="transition-colors hover:text-black"
-          >
-            Learn to build your own
-          </a>
-          .
-        </p>
+        {/* Removed the footer text */}
       </div>
     </main>
   );
