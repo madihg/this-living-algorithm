@@ -65,7 +65,6 @@ export default function Chat() {
   const [messagePosition, setMessagePosition] = useState<"left" | "right">("right");
   const [responseOpacity, setResponseOpacity] = useState<number>(1);
   const [lastResponseComplete, setLastResponseComplete] = useState<boolean>(true);
-  const [messageVisible, setMessageVisible] = useState<boolean>(false);
   const [randomizedButtons, setRandomizedButtons] = useState([
     { text: `And then Almitra said, speak to us of ${prophetSubjects[Math.floor(Math.random() * prophetSubjects.length)]}`, imagePath: "/button-images/button1.jpg" },
     { text: `And then Almitra said, speak to us of ${prophetSubjects[Math.floor(Math.random() * prophetSubjects.length)]}`, imagePath: "/button-images/button2.jpg" },
@@ -108,12 +107,10 @@ export default function Chat() {
     }
   }, [responseOpacity]);
   
-  // Display message flag update when chat messages change
+  // Debug helper to log state changes
   useEffect(() => {
-    if (chatMessages.length > 0) {
-      setMessageVisible(true);
-    }
-  }, [chatMessages]);
+    console.log("Response state changed:", { responseOpacity, lastResponseComplete, isLoading });
+  }, [responseOpacity, lastResponseComplete, isLoading]);
   
   // Randomize button subjects when response fades away
   useEffect(() => {
@@ -128,7 +125,7 @@ export default function Chat() {
 
   // Function to handle button clicks - simplified to ensure it always triggers a response
   const handleButtonClick = (option: string) => {
-    if (isLoading) return; // Only prevent clicks while loading
+    if (isLoading || !lastResponseComplete) return; // Prevent clicks while loading or response not complete
     
     setInput(option);
     // Randomize message position
@@ -137,27 +134,10 @@ export default function Chat() {
     // Start loading animation
     animateProphetMessages();
     
-    // Set message as visible
-    setMessageVisible(true);
-    
     // Submit the form with a small delay to ensure everything is set
     setTimeout(() => {
       formRef.current?.requestSubmit();
     }, 50);
-  };
-  
-  // Function to reset the UI and enable new interactions
-  const handleReset = () => {
-    setLastResponseComplete(true);
-    setResponseOpacity(0);
-    setMessageVisible(false);
-    
-    // Randomize new button subjects
-    setRandomizedButtons([
-      { text: `And then Almitra said, speak to us of ${prophetSubjects[Math.floor(Math.random() * prophetSubjects.length)]}`, imagePath: "/button-images/button1.jpg" },
-      { text: `And then Almitra said, speak to us of ${prophetSubjects[Math.floor(Math.random() * prophetSubjects.length)]}`, imagePath: "/button-images/button2.jpg" },
-      { text: `And then Almitra said, speak to us of ${prophetSubjects[Math.floor(Math.random() * prophetSubjects.length)]}`, imagePath: "/button-images/button3.jpg" },
-    ]);
   };
 
   // Function to animate prophet messages at the top of the page
@@ -234,14 +214,14 @@ export default function Chat() {
       <div className="absolute top-5 hidden w-full justify-between px-5 sm:flex">
       </div>
       
-      {/* Prophet message above the welcome image */}
+      {/* Prophet message at the top of the page */}
       {loadingMessage && (
         <div 
-          className="fixed top-20 left-0 right-0 mx-auto z-50 text-center transition-opacity duration-1000"
-          style={{ opacity: loadingOpacity }}
+          className="fixed top-10 left-0 right-0 mx-auto z-50 text-center transition-opacity duration-1000 mt-8"
+          style={{ opacity: loadingOpacity, width: 'fit-content', padding: '0.5rem' }}
         >
-          <div className="inline-block bg-white border border-black p-4">
-            <div className="whitespace-pre-line text-2xl">{loadingMessage}</div>
+          <div className="whitespace-pre-line text-xl bg-white border border-black p-2">
+            {loadingMessage}
           </div>
         </div>
       )}
@@ -249,7 +229,7 @@ export default function Chat() {
       {/* Main content area - always shown */}
       <div className="mx-5 mt-20 max-w-screen-md w-full sm:w-full relative">
         <div className="flex flex-col items-center justify-center p-7 sm:p-10">
-          {/* Welcome image - always shown (removed border) */}
+          {/* Welcome image */}
           <div className="border border-black">
             <Image
               src="/welcome-image.jpg"
@@ -260,7 +240,7 @@ export default function Chat() {
             />
           </div>
           
-          {/* Message display area - conditionally positioned */}
+          {/* Message display area */}
           {chatMessages.length > 0 && chatMessages[chatMessages.length - 1].role === "assistant" && (
             <div 
               className={clsx(
@@ -278,7 +258,6 @@ export default function Chat() {
       </div>
       
       <div className="fixed bottom-0 flex w-full flex-col items-center space-y-3 bg-gradient-to-b from-transparent via-gray-100 to-gray-100 p-5 pb-3 sm:px-0">
-        {/* Removed any form borders */}
         <form
           ref={formRef}
           onSubmit={handleSubmit}
@@ -292,45 +271,42 @@ export default function Chat() {
             className="hidden"
           />
           
-          {/* Buttons with images instead of text - no container border */}
-          <div className="flex flex-col items-center gap-5">
-            {/* Reset button */}
-            {messageVisible && (
+          {/* Fallback button always enabled */}
+          <div className="flex justify-center mb-5">
+            <button
+              type="button"
+              className="p-2 bg-white border border-black hover:opacity-90"
+              onClick={() => handleButtonClick("kneel, gift, pray again")}
+            >
+              kneel, gift, pray again
+            </button>
+          </div>
+          
+          {/* Buttons with images */}
+          <div className="flex flex-wrap gap-5 justify-center">
+            {randomizedButtons.map((option, i) => (
               <button
+                key={i}
                 type="button"
-                className="mb-4 py-2 px-6 bg-white text-black border border-black hover:bg-gray-100 transition-all"
-                onClick={handleReset}
+                className={clsx(
+                  "p-0 transition-all overflow-hidden",
+                  (isLoading || (responseOpacity > 0 && !lastResponseComplete)) ? "cursor-not-allowed opacity-50" : "hover:opacity-90"
+                )}
+                onClick={() => handleButtonClick(option.text)}
+                disabled={isLoading || (responseOpacity > 0 && !lastResponseComplete)}
+                aria-label={option.text}
               >
-                kneel, gift, pray again
+                <div className="border border-black">
+                  <Image 
+                    src={option.imagePath}
+                    alt={option.text}
+                    width={120}
+                    height={80}
+                    className="w-full h-auto"
+                  />
+                </div>
               </button>
-            )}
-            
-            {/* Main image buttons */}
-            <div className="flex flex-wrap gap-5 justify-center">
-              {randomizedButtons.map((option, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  className={clsx(
-                    "p-0 transition-all overflow-hidden",
-                    isLoading ? "cursor-not-allowed opacity-50" : "hover:opacity-90"
-                  )}
-                  onClick={() => handleButtonClick(option.text)}
-                  disabled={isLoading}
-                  aria-label={option.text}
-                >
-                  <div className="border border-black">
-                    <Image 
-                      src={option.imagePath}
-                      alt={option.text}
-                      width={120}
-                      height={80}
-                      className="w-full h-auto"
-                    />
-                  </div>
-                </button>
-              ))}
-            </div>
+            ))}
           </div>
         </form>
       </div>
