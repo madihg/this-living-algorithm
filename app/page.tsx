@@ -13,10 +13,11 @@ import {
 import Textarea from "react-textarea-autosize";
 import Image from "next/image";
 
-const examples = [
-  "Example 1",
-  "Example 2",
-  "Example 3",
+// Define the button options
+const buttonOptions = [
+  "Tell me about AI",
+  "Share an interesting fact",
+  "Give me a coding tip",
 ];
 
 export default function Chat() {
@@ -32,7 +33,14 @@ export default function Chat() {
     },
   });
 
-  const disabled = isLoading || input.length === 0;
+  const disabled = isLoading;
+
+  // Function to handle button clicks
+  const handleButtonClick = (option) => {
+    setInput(option);
+    // Use the existing form submission
+    formRef.current?.requestSubmit();
+  };
 
   return (
     <main className="flex flex-col items-center justify-between pb-40">
@@ -106,16 +114,13 @@ export default function Chat() {
             </p>
           </div>
           <div className="flex flex-col space-y-4 border-t border-gray-200 bg-gray-50 p-7 sm:p-10">
-            {examples.map((example, i) => (
+            {buttonOptions.map((option, i) => (
               <button
                 key={i}
                 className="rounded-md border border-gray-200 bg-white px-5 py-3 text-left text-sm text-gray-500 transition-all duration-75 hover:border-black hover:text-gray-700 active:bg-gray-50"
-                onClick={() => {
-                  setInput(example);
-                  inputRef.current?.focus();
-                }}
+                onClick={() => handleButtonClick(option)}
               >
-                {example}
+                {option}
               </button>
             ))}
           </div>
@@ -125,46 +130,35 @@ export default function Chat() {
         <form
           ref={formRef}
           onSubmit={handleSubmit}
-          className="relative w-full max-w-screen-md rounded-xl border border-gray-200 bg-white px-4 pb-2 pt-3 shadow-lg sm:pb-3 sm:pt-4"
+          className="relative w-full max-w-screen-md rounded-xl border border-gray-200 bg-white px-4 py-4 shadow-lg"
         >
-          <Textarea
+          {/* Hidden textarea to maintain form functionality */}
+          <textarea
             ref={inputRef}
-            tabIndex={0}
-            required
-            rows={1}
-            autoFocus
-            placeholder="Send a message"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                formRef.current?.requestSubmit();
-                e.preventDefault();
-              }
-            }}
-            spellCheck={false}
-            className="w-full pr-10 focus:outline-none"
+            className="hidden"
           />
-          <button
-            className={clsx(
-              "absolute inset-y-0 right-3 my-auto flex h-8 w-8 items-center justify-center rounded-md transition-all",
-              disabled
-                ? "cursor-not-allowed bg-white"
-                : "bg-green-500 hover:bg-green-600",
-            )}
-            disabled={disabled}
-          >
-            {isLoading ? (
-              <LoadingCircle />
-            ) : (
-              <SendIcon
+          
+          {/* Buttons instead of visible input */}
+          <div className="flex flex-wrap gap-3 justify-center">
+            {buttonOptions.map((option, i) => (
+              <button
+                key={i}
+                type="button"
                 className={clsx(
-                  "h-4 w-4",
-                  input.length === 0 ? "text-gray-300" : "text-white",
+                  "px-4 py-3 rounded-md font-medium transition-all",
+                  isLoading
+                    ? "cursor-not-allowed bg-gray-100 text-gray-400"
+                    : "bg-green-500 text-white hover:bg-green-600",
                 )}
-              />
-            )}
-          </button>
+                onClick={() => handleButtonClick(option)}
+                disabled={isLoading}
+              >
+                {option}
+              </button>
+            ))}
+          </div>
         </form>
         <p className="text-center text-xs text-gray-400">
           Built with{" "}
