@@ -78,6 +78,42 @@ export default function Chat() {
     { text: `And then Almitra said, speak to us of ${prophetSubjects[Math.floor(Math.random() * prophetSubjects.length)]}`, imagePath: "/button-images/button2.jpg" },
     { text: `And then Almitra said, speak to us of ${prophetSubjects[Math.floor(Math.random() * prophetSubjects.length)]}`, imagePath: "/button-images/button3.jpg" },
   ]);
+
+  const { messages, input, setInput, handleSubmit, isLoading } = useChat({
+    onResponse: (response) => {
+      if (response.status === 429) {
+        window.alert("You have reached your request limit for the day.");
+        return;
+      }
+      
+      // Reset response opacity when new response arrives
+      setResponseOpacity(1);
+      setLastResponseComplete(false);
+      
+      // Set up fade-out timer for response
+      setTimeout(() => {
+        let opacity = 1;
+        const fadeInterval = setInterval(() => {
+          opacity -= 0.05;
+          setResponseOpacity(Math.max(0, opacity));
+          if (opacity <= 0) {
+            clearInterval(fadeInterval);
+            // Force a delay before enabling buttons to ensure state updates properly
+            setTimeout(() => {
+              setLastResponseComplete(true); // Mark response as complete when it's fully faded
+            }, 100);
+          }
+        }, 250);
+      }, 10000); // Start fading after 10 seconds
+    },
+  });
+  
+  // Add an effect to track response opacity and update button state
+  useEffect(() => {
+    if (responseOpacity <= 0) {
+      setLastResponseComplete(true);
+    }
+  }, [responseOpacity]);
   
   // Debug helper to log state changes
   useEffect(() => {
