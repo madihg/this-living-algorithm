@@ -36,7 +36,7 @@ export default function Chat() {
   const disabled = isLoading;
 
   // Function to handle button clicks
-  const handleButtonClick = (option) => {
+  const handleButtonClick = (option: string) => {
     setInput(option);
     // Use the existing form submission
     formRef.current?.requestSubmit();
