@@ -26,7 +26,7 @@ const prophetMessages = [
   "the prophet is seeing",
   "the prophet is saying",
   "a machine is praying",
-  "your magi gifts has been submitted",
+  "your magi gift has been submitted",
   "prayers computing",
   "this website prays",
   "this website is a shrine that changes",
