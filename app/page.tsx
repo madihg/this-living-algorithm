@@ -15,9 +15,9 @@ import Image from "next/image";
 
 // Define the button options with image paths
 const buttonOptions = [
-  { text: "Tell me about AI", imagePath: "/button-images/button1.png" },
-  { text: "Share an interesting fact", imagePath: "/button-images/button2.png" },
-  { text: "Give me a coding tip", imagePath: "/button-images/button3.png" },
+  { text: "Tell me about AI", imagePath: "/button-images/button1.jpg" },
+  { text: "Share an interesting fact", imagePath: "/button-images/button2.jpg" },
+  { text: "Give me a coding tip", imagePath: "/button-images/button3.jpg" },
 ];
 
 export default function Chat() {
@@ -85,7 +85,7 @@ export default function Chat() {
           <div className="flex flex-col items-center justify-center p-7 sm:p-10">
             {/* Replaced text with a placeholder image */}
             <Image
-              src="/welcome-image.png"
+              src="/welcome-image.jpg"
               alt="Welcome"
               width={400}
               height={300}
