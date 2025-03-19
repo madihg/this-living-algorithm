@@ -15,9 +15,9 @@ import Image from "next/image";
 
 // Define the button options with image paths
 const buttonOptions = [
-  { text: "Tell me about AI", imagePath: "/button-images/button1.jpg" },
-  { text: "Share an interesting fact", imagePath: "/button-images/button2.jpg" },
-  { text: "Give me a coding tip", imagePath: "/button-images/button3.jpg" },
+  { text: "And an astronomer said, Master, what of Time'?", imagePath: "/button-images/button1.jpg" },
+  { text: "Then a pnestess said, Speak to us of Prayer.", imagePath: "/button-images/button2.jpg" },
+  { text: "And · a poet said, Speak to us of Beauty.", imagePath: "/button-images/button3.jpg" },
 ];
 
 // Updated prophet loading messages
@@ -26,7 +26,7 @@ const prophetMessages = [
   "the prophet is seeing",
   "the prophet is saying",
   "a machine is praying",
-  "your magi gifts has been submitted",
+  "your magi gift has been submitted",
   "prayers computing",
   "this website prays",
   "this website is a shrine that changes",
@@ -41,8 +41,8 @@ export default function Chat() {
   const [loadingOpacity, setLoadingOpacity] = useState<number>(0);
   const [messagePosition, setMessagePosition] = useState<"left" | "right">("right");
   const [responseOpacity, setResponseOpacity] = useState<number>(1);
-  const [buttonDisabled, setButtonDisabled] = useState<boolean>(false);
-  const [prophetPosition, setProphetPosition] = useState({ top: 0, left: 0 });
+  const [lastResponseComplete, setLastResponseComplete] = useState<boolean>(true);
+  const [loadingPosition, setLoadingPosition] = useState({ top: "25%", left: "50%" });
 
   const { messages, input, setInput, handleSubmit, isLoading } = useChat({
     onResponse: (response) => {
@@ -53,6 +53,7 @@ export default function Chat() {
       
       // Reset response opacity when new response arrives
       setResponseOpacity(1);
+      setLastResponseComplete(false);
       
       // Set up fade-out timer for response
       setTimeout(() => {
@@ -62,34 +63,34 @@ export default function Chat() {
           setResponseOpacity(Math.max(0, opacity));
           if (opacity <= 0) {
             clearInterval(fadeInterval);
-            // Re-enable buttons after response fades
-            setButtonDisabled(false);
+            setLastResponseComplete(true); // Mark response as complete when it's fully faded
           }
         }, 250);
       }, 10000); // Start fading after 10 seconds
     },
   });
 
-  // Function to handle button clicks
+  // Function to handle button clicks - simplified to ensure it always triggers a response
   const handleButtonClick = (option: string) => {
-    // Disable buttons immediately
-    setButtonDisabled(true);
-    setInput(option);
+    if (isLoading || !lastResponseComplete) return; // Prevent clicks while loading or response not complete
     
+    setInput(option);
     // Randomize message position
     setMessagePosition(Math.random() > 0.5 ? "left" : "right");
     
-    // Randomize prophet message position - slight variation around current position
-    setProphetPosition({
-      top: 200 + Math.floor(Math.random() * 100 - 50), // Vary by ±50px vertically
-      left: Math.floor(Math.random() * 100 - 50)  // Vary by ±50px horizontally
+    // Randomize prophet message position slightly
+    setLoadingPosition({
+      top: `${20 + Math.random() * 10}%`,
+      left: `${45 + Math.random() * 10}%`
     });
     
     // Start loading animation
     animateProphetMessages();
     
-    // Use the existing form submission
-    formRef.current?.requestSubmit();
+    // Submit the form with a small delay to ensure everything is set
+    setTimeout(() => {
+      formRef.current?.requestSubmit();
+    }, 50);
   };
 
   // Function to animate prophet messages
@@ -124,6 +125,11 @@ export default function Chat() {
           messageIndex++;
           
           if (messageIndex < selectedMessages.length) {
+            // Slightly randomize position for each message
+            setLoadingPosition({
+              top: `${20 + Math.random() * 10}%`,
+              left: `${45 + Math.random() * 10}%`
+            });
             setTimeout(fadeIn, 100);
           } else {
             setLoadingMessage("");
@@ -135,7 +141,7 @@ export default function Chat() {
     fadeIn();
   };
 
-  // Helper function to truncate text to 8 lines and add ellipsis - guaranteed to work
+  // Helper function to truncate text to 8 lines and add ellipsis - more aggressive truncation
   const truncateText = (text: string): string => {
     // First split by newlines
     const lines = text.split('\n');
@@ -143,12 +149,16 @@ export default function Chat() {
       return lines.slice(0, 8).join('\n') + '...';
     }
     
-    // If not enough line breaks, count characters and approximate
-    // Average of 50 characters per line for 8 lines = 400 characters
-    if (text.length > 400) {
-      // Find the last space before character limit to avoid cutting words
-      const cutoff = text.substring(0, 400).lastIndexOf(' ');
-      return text.substring(0, cutoff > 0 ? cutoff : 400) + '...';
+    // If not enough line breaks, also check by character count
+    // We'll use a more aggressive approach with shorter character count
+    const charLimit = 400; // Reduced from 500 to be more aggressive with truncation
+    if (text.length > charLimit) {
+      // Try to find a natural break point near the limit
+      const breakPoint = text.lastIndexOf('. ', charLimit);
+      if (breakPoint > charLimit * 0.7) { // If we found a good break point
+        return text.substring(0, breakPoint + 1) + '...';
+      }
+      return text.substring(0, charLimit) + '...';
     }
     
     return text;
@@ -162,7 +172,7 @@ export default function Chat() {
       {/* Main content area - always shown */}
       <div className="mx-5 mt-20 max-w-screen-md w-full sm:w-full relative">
         <div className="flex flex-col items-center justify-center p-7 sm:p-10">
-          {/* Welcome image - always shown */}
+          {/* Welcome image - always shown (removed border) */}
           <div className="border border-black">
             <Image
               src="/welcome-image.jpg"
@@ -182,7 +192,7 @@ export default function Chat() {
               )}
               style={{ opacity: responseOpacity, transition: "opacity 1s" }}
             >
-              <div className="prose prose-p:leading-relaxed break-words">
+              <div className="prose prose-p:leading-relaxed break-words max-h-60 overflow-hidden">
                 {truncateText(messages[messages.length - 1].content)}
               </div>
             </div>
@@ -193,13 +203,12 @@ export default function Chat() {
       {/* Prophet loading message in a bordered box with randomized position */}
       {loadingMessage && (
         <div 
-          className="fixed mx-auto z-50 bg-white border border-black p-4 text-center transition-opacity duration-500" 
+          className="fixed z-50 bg-white border border-black p-4 text-center transition-opacity duration-500" 
           style={{ 
             opacity: loadingOpacity,
-            top: `${prophetPosition.top}px`,
-            left: `50%`,
-            transform: `translateX(calc(-50% + ${prophetPosition.left}px))`,
-            maxWidth: '80%'
+            top: loadingPosition.top,
+            left: loadingPosition.left,
+            transform: 'translate(-50%, -50%)'
           }}
         >
           <div className="whitespace-pre-line">{loadingMessage}</div>
@@ -229,10 +238,10 @@ export default function Chat() {
                 type="button"
                 className={clsx(
                   "p-0 transition-all overflow-hidden",
-                  (isLoading || buttonDisabled) ? "cursor-not-allowed opacity-50" : "hover:opacity-90"
+                  (!lastResponseComplete || isLoading) ? "cursor-not-allowed opacity-50" : "hover:opacity-90"
                 )}
-                onClick={() => !buttonDisabled && handleButtonClick(option.text)}
-                disabled={isLoading || buttonDisabled}
+                onClick={() => handleButtonClick(option.text)}
+                disabled={!lastResponseComplete || isLoading}
                 aria-label={option.text}
               >
                 <div className="border border-black">
