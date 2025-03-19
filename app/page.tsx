@@ -43,25 +43,18 @@ const prophetSubjects = [
   "Death"
 ];
 
-// Define the button options with image paths
-const buttonOptions = [
-  { text: `And then Almitra said, speak to us of ${prophetSubjects[Math.floor(Math.random() * prophetSubjects.length)]}`, imagePath: "/button-images/button1.jpg" },
-  { text: `And then Almitra said, speak to us of ${prophetSubjects[Math.floor(Math.random() * prophetSubjects.length)]}`, imagePath: "/button-images/button2.jpg" },
-  { text: `And then Almitra said, speak to us of ${prophetSubjects[Math.floor(Math.random() * prophetSubjects.length)]}`, imagePath: "/button-images/button3.jpg" },
-];
-
-// Updated prophet loading messages
+// Updated prophet loading messages - last message is fixed as requested
 const prophetMessages = [
   "the prophet is breathing",
   "the prophet is seeing",
   "the prophet is saying",
   "a machine is praying",
-  "your magi gift has been submitted",
   "prayers computing",
   "this website prays",
   "this website is a shrine that changes",
   "this prophet is a diary\ncracked open\nto a chapter of vulnerability",
-  "wait for the living\nalgorithm"
+  "wait for the living\nalgorithm",
+  "your magi gift has been submitted" // This will always be the last message
 ];
 
 export default function Chat() {
@@ -72,14 +65,13 @@ export default function Chat() {
   const [messagePosition, setMessagePosition] = useState<"left" | "right">("right");
   const [responseOpacity, setResponseOpacity] = useState<number>(1);
   const [lastResponseComplete, setLastResponseComplete] = useState<boolean>(true);
-  const [loadingPosition, setLoadingPosition] = useState({ top: "25%", left: "50%" });
   const [randomizedButtons, setRandomizedButtons] = useState([
     { text: `And then Almitra said, speak to us of ${prophetSubjects[Math.floor(Math.random() * prophetSubjects.length)]}`, imagePath: "/button-images/button1.jpg" },
     { text: `And then Almitra said, speak to us of ${prophetSubjects[Math.floor(Math.random() * prophetSubjects.length)]}`, imagePath: "/button-images/button2.jpg" },
     { text: `And then Almitra said, speak to us of ${prophetSubjects[Math.floor(Math.random() * prophetSubjects.length)]}`, imagePath: "/button-images/button3.jpg" },
   ]);
 
-  const { messages, input, setInput, handleSubmit, isLoading } = useChat({
+  const { messages: chatMessages, input, setInput, handleSubmit, isLoading } = useChat({
     onResponse: (response) => {
       if (response.status === 429) {
         window.alert("You have reached your request limit for the day.");
@@ -131,42 +123,6 @@ export default function Chat() {
     }
   }, [lastResponseComplete, responseOpacity]);
 
-  const { messages, input, setInput, handleSubmit, isLoading } = useChat({
-    onResponse: (response) => {
-      if (response.status === 429) {
-        window.alert("You have reached your request limit for the day.");
-        return;
-      }
-      
-      // Reset response opacity when new response arrives
-      setResponseOpacity(1);
-      setLastResponseComplete(false);
-      
-      // Set up fade-out timer for response
-      setTimeout(() => {
-        let opacity = 1;
-        const fadeInterval = setInterval(() => {
-          opacity -= 0.05;
-          setResponseOpacity(Math.max(0, opacity));
-          if (opacity <= 0) {
-            clearInterval(fadeInterval);
-            // Force a delay before enabling buttons to ensure state updates properly
-            setTimeout(() => {
-              setLastResponseComplete(true); // Mark response as complete when it's fully faded
-            }, 100);
-          }
-        }, 250);
-      }, 10000); // Start fading after 10 seconds
-    },
-  });
-  
-  // Add an effect to track response opacity and update button state
-  useEffect(() => {
-    if (responseOpacity <= 0) {
-      setLastResponseComplete(true);
-    }
-  }, [responseOpacity]);
-
   // Function to handle button clicks - simplified to ensure it always triggers a response
   const handleButtonClick = (option: string) => {
     if (isLoading || !lastResponseComplete) return; // Prevent clicks while loading or response not complete
@@ -174,12 +130,6 @@ export default function Chat() {
     setInput(option);
     // Randomize message position
     setMessagePosition(Math.random() > 0.5 ? "left" : "right");
-    
-    // Randomize prophet message position slightly
-    setLoadingPosition({
-      top: `${20 + Math.random() * 10}%`,
-      left: `${45 + Math.random() * 10}%`
-    });
     
     // Start loading animation
     animateProphetMessages();
@@ -190,12 +140,15 @@ export default function Chat() {
     }, 50);
   };
 
-  // Function to animate prophet messages
+  // Function to animate prophet messages at the top of the page
   const animateProphetMessages = () => {
-    // Select 5 random messages from the array
-    const selectedMessages = [...prophetMessages]
+    // Select 4 random messages from the array (excluding the last one)
+    const selectedMessages = [...prophetMessages.slice(0, -1)]
       .sort(() => 0.5 - Math.random())
-      .slice(0, 5);
+      .slice(0, 4);
+    
+    // Add the fixed last message
+    selectedMessages.push(prophetMessages[prophetMessages.length - 1]);
     
     let messageIndex = 0;
     
@@ -203,42 +156,37 @@ export default function Chat() {
       setLoadingMessage(selectedMessages[messageIndex]);
       let opacity = 0;
       const fadeInInterval = setInterval(() => {
-        opacity += 0.1;
+        opacity += 0.05;
         setLoadingOpacity(opacity);
         if (opacity >= 1) {
           clearInterval(fadeInInterval);
-          setTimeout(fadeOut, 600); // Keep message visible a bit longer
+          setTimeout(fadeOut, 800); // Keep message visible a bit longer
         }
-      }, 50);
+      }, 100); // Slower fade in
     };
     
     const fadeOut = () => {
       let opacity = 1;
       const fadeOutInterval = setInterval(() => {
-        opacity -= 0.1;
+        opacity -= 0.05;
         setLoadingOpacity(opacity);
         if (opacity <= 0) {
           clearInterval(fadeOutInterval);
           messageIndex++;
           
           if (messageIndex < selectedMessages.length) {
-            // Slightly randomize position for each message
-            setLoadingPosition({
-              top: `${20 + Math.random() * 10}%`,
-              left: `${45 + Math.random() * 10}%`
-            });
-            setTimeout(fadeIn, 100);
+            setTimeout(fadeIn, 150);
           } else {
             setLoadingMessage("");
           }
         }
-      }, 50);
+      }, 100); // Slower fade out
     };
     
     fadeIn();
   };
 
-  // Helper function to truncate text to 8 lines and add ellipsis - more aggressive truncation
+  // Helper function to truncate text to 8 lines and add ellipsis
   const truncateText = (text: string): string => {
     // First split by newlines
     const lines = text.split('\n');
@@ -248,7 +196,7 @@ export default function Chat() {
     
     // If not enough line breaks, also check by character count
     // We'll use a more aggressive approach with shorter character count
-    const charLimit = 400; // Reduced from 500 to be more aggressive with truncation
+    const charLimit = 400; 
     if (text.length > charLimit) {
       // Try to find a natural break point near the limit
       const breakPoint = text.lastIndexOf('. ', charLimit);
@@ -266,6 +214,16 @@ export default function Chat() {
       <div className="absolute top-5 hidden w-full justify-between px-5 sm:flex">
       </div>
       
+      {/* Prophet message at the top of the page */}
+      {loadingMessage && (
+        <div 
+          className="fixed top-10 left-0 right-0 mx-auto z-50 text-center transition-opacity duration-1000 mt-8"
+          style={{ opacity: loadingOpacity }}
+        >
+          <div className="whitespace-pre-line text-3xl">{loadingMessage}</div>
+        </div>
+      )}
+      
       {/* Main content area - always shown */}
       <div className="mx-5 mt-20 max-w-screen-md w-full sm:w-full relative">
         <div className="flex flex-col items-center justify-center p-7 sm:p-10">
@@ -281,7 +239,7 @@ export default function Chat() {
           </div>
           
           {/* Message display area - conditionally positioned */}
-          {messages.length > 0 && messages[messages.length - 1].role === "assistant" && (
+          {chatMessages.length > 0 && chatMessages[chatMessages.length - 1].role === "assistant" && (
             <div 
               className={clsx(
                 "absolute max-w-xs bg-white border border-black p-4",
@@ -290,27 +248,12 @@ export default function Chat() {
               style={{ opacity: responseOpacity, transition: "opacity 1s" }}
             >
               <div className="prose prose-p:leading-relaxed break-words max-h-60 overflow-hidden">
-                {truncateText(messages[messages.length - 1].content)}
+                {truncateText(chatMessages[chatMessages.length - 1].content)}
               </div>
             </div>
           )}
         </div>
       </div>
-
-      {/* Prophet loading message in a bordered box with randomized position */}
-      {loadingMessage && (
-        <div 
-          className="fixed z-50 bg-white border border-black p-4 text-center transition-opacity duration-500" 
-          style={{ 
-            opacity: loadingOpacity,
-            top: loadingPosition.top,
-            left: loadingPosition.left,
-            transform: 'translate(-50%, -50%)'
-          }}
-        >
-          <div className="whitespace-pre-line">{loadingMessage}</div>
-        </div>
-      )}
       
       <div className="fixed bottom-0 flex w-full flex-col items-center space-y-3 bg-gradient-to-b from-transparent via-gray-100 to-gray-100 p-5 pb-3 sm:px-0">
         {/* Removed any form borders */}
