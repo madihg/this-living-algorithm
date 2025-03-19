@@ -15,9 +15,9 @@ import Image from "next/image";
 
 // Define the button options with image paths
 const buttonOptions = [
-  { text: "Tell me about AI", imagePath: "/button-images/button1.jpg" },
-  { text: "Share an interesting fact", imagePath: "/button-images/button2.jpg" },
-  { text: "Give me a coding tip", imagePath: "/button-images/button3.jpg" },
+  { text: "And an astronomer said, Master, what of Time'?", imagePath: "/button-images/button1.jpg" },
+  { text: "Then a pnestess said, Speak to us of Prayer.", imagePath: "/button-images/button2.jpg" },
+  { text: "And · a poet said, Speak to us of Beauty.", imagePath: "/button-images/button3.jpg" },
 ];
 
 // Updated prophet loading messages
