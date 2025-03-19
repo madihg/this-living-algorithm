@@ -57,6 +57,43 @@ const prophetMessages = [
   "your magi gift has been submitted" // This will always be the last message
 ];
 
+// ASCII art for the background
+const leftTempleAscii = `
+     /\\
+    /  \\
+   /____\\
+  /|    |\\
+ / |    | \\
+/__|____|__\\
+   /|  |\\
+  / |  | \\
+ /__|__|__\\
+    |  |
+    |  |
+    
+  ∞ ◯ ∞
+  
+  ☥ △ ☥
+  ⚶ ⚷ ⚶
+`;
+
+const rightSunAscii = `
+     \\|/
+    - ☼ -
+     /|\\
+   * * * *
+  *   |   *
+ *    |    *
+*_____|_____*
+      |
+      |
+     ☸︎☯︎☸︎
+    ☽ ◯ ☾
+    
+    ∞∞∞∞∞
+    ☤ ⚱ ☤
+`;
+
 export default function Chat() {
   const formRef = useRef<HTMLFormElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -218,6 +255,35 @@ export default function Chat() {
 
   return (
     <main className="flex flex-col items-center justify-between pb-40" style={{ fontFamily: "Times New Roman, serif", fontStyle: "italic" }}>
+      {/* ASCII art backgrounds */}
+      {/* Left side ASCII temple */}
+      <div className="fixed left-5 top-1/4 text-gray-300 opacity-30 z-0 hidden md:block">
+        <pre style={{ fontSize: "12px", lineHeight: "12px", fontFamily: "monospace" }}>
+          {leftTempleAscii}
+        </pre>
+      </div>
+      
+      {/* Duplicate left temple at bottom left with different opacity */}
+      <div className="fixed left-5 bottom-40 text-gray-200 opacity-15 z-0 hidden md:block rotate-180">
+        <pre style={{ fontSize: "10px", lineHeight: "10px", fontFamily: "monospace" }}>
+          {leftTempleAscii}
+        </pre>
+      </div>
+      
+      {/* Right side ASCII sun */}
+      <div className="fixed right-5 top-1/4 text-gray-300 opacity-30 z-0 hidden md:block">
+        <pre style={{ fontSize: "12px", lineHeight: "12px", fontFamily: "monospace" }}>
+          {rightSunAscii}
+        </pre>
+      </div>
+      
+      {/* Duplicate sun at bottom right with different opacity */}
+      <div className="fixed right-5 bottom-40 text-gray-200 opacity-15 z-0 hidden md:block rotate-180">
+        <pre style={{ fontSize: "10px", lineHeight: "10px", fontFamily: "monospace" }}>
+          {rightSunAscii}
+        </pre>
+      </div>
+      
       <div className="absolute top-5 hidden w-full justify-between px-5 sm:flex">
       </div>
       
