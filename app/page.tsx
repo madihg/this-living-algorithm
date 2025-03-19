@@ -43,6 +43,11 @@ export default function Chat() {
   const [responseOpacity, setResponseOpacity] = useState<number>(1);
   const [lastResponseComplete, setLastResponseComplete] = useState<boolean>(true);
   const [loadingPosition, setLoadingPosition] = useState({ top: "25%", left: "50%" });
+  
+  // Debug helper to log state changes
+  useEffect(() => {
+    console.log("Response state changed:", { responseOpacity, lastResponseComplete, isLoading });
+  }, [responseOpacity, lastResponseComplete, isLoading]);
 
   const { messages, input, setInput, handleSubmit, isLoading } = useChat({
     onResponse: (response) => {
@@ -63,12 +68,22 @@ export default function Chat() {
           setResponseOpacity(Math.max(0, opacity));
           if (opacity <= 0) {
             clearInterval(fadeInterval);
-            setLastResponseComplete(true); // Mark response as complete when it's fully faded
+            // Force a delay before enabling buttons to ensure state updates properly
+            setTimeout(() => {
+              setLastResponseComplete(true); // Mark response as complete when it's fully faded
+            }, 100);
           }
         }, 250);
       }, 10000); // Start fading after 10 seconds
     },
   });
+  
+  // Add an effect to track response opacity and update button state
+  useEffect(() => {
+    if (responseOpacity <= 0) {
+      setLastResponseComplete(true);
+    }
+  }, [responseOpacity]);
 
   // Function to handle button clicks - simplified to ensure it always triggers a response
   const handleButtonClick = (option: string) => {
@@ -238,10 +253,10 @@ export default function Chat() {
                 type="button"
                 className={clsx(
                   "p-0 transition-all overflow-hidden",
-                  (!lastResponseComplete || isLoading) ? "cursor-not-allowed opacity-50" : "hover:opacity-90"
+                  (isLoading || (responseOpacity > 0 && !lastResponseComplete)) ? "cursor-not-allowed opacity-50" : "hover:opacity-90"
                 )}
                 onClick={() => handleButtonClick(option.text)}
-                disabled={!lastResponseComplete || isLoading}
+                disabled={isLoading || (responseOpacity > 0 && !lastResponseComplete)}
                 aria-label={option.text}
               >
                 <div className="border border-black">
