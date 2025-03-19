@@ -129,7 +129,7 @@ export default function Chat() {
   };
 
   // Helper function to truncate text to 9 lines and add ellipsis
-  const truncateText = (text) => {
+  const truncateText = (text: string): string => {
     const lines = text.split('\n');
     if (lines.length > 9) {
       return lines.slice(0, 9).join('\n') + '...';
