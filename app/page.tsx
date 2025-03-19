@@ -13,11 +13,41 @@ import {
 import Textarea from "react-textarea-autosize";
 import Image from "next/image";
 
+// Define the subjects from The Prophet
+const prophetSubjects = [
+  "Love",
+  "Marriage",
+  "Children",
+  "Giving",
+  "Eating and Drinking",
+  "Work",
+  "Joy and Sorrow",
+  "Houses",
+  "Clothes",
+  "Buying and Selling",
+  "Crime and Punishment",
+  "Laws",
+  "Freedom",
+  "Reason and Passion",
+  "Pain",
+  "Self-Knowledge",
+  "Teaching",
+  "Friendship",
+  "Talking",
+  "Time",
+  "Good and Evil",
+  "Prayer",
+  "Pleasure",
+  "Beauty",
+  "Religion",
+  "Death"
+];
+
 // Define the button options with image paths
 const buttonOptions = [
-  { text: "And an astronomer said, Master, what of Time'?", imagePath: "/button-images/button1.jpg" },
-  { text: "Then a pnestess said, Speak to us of Prayer.", imagePath: "/button-images/button2.jpg" },
-  { text: "And · a poet said, Speak to us of Beauty.", imagePath: "/button-images/button3.jpg" },
+  { text: `And then Almitra said, speak to us of ${prophetSubjects[Math.floor(Math.random() * prophetSubjects.length)]}`, imagePath: "/button-images/button1.jpg" },
+  { text: `And then Almitra said, speak to us of ${prophetSubjects[Math.floor(Math.random() * prophetSubjects.length)]}`, imagePath: "/button-images/button2.jpg" },
+  { text: `And then Almitra said, speak to us of ${prophetSubjects[Math.floor(Math.random() * prophetSubjects.length)]}`, imagePath: "/button-images/button3.jpg" },
 ];
 
 // Updated prophet loading messages
@@ -43,11 +73,27 @@ export default function Chat() {
   const [responseOpacity, setResponseOpacity] = useState<number>(1);
   const [lastResponseComplete, setLastResponseComplete] = useState<boolean>(true);
   const [loadingPosition, setLoadingPosition] = useState({ top: "25%", left: "50%" });
+  const [randomizedButtons, setRandomizedButtons] = useState([
+    { text: `And then Almitra said, speak to us of ${prophetSubjects[Math.floor(Math.random() * prophetSubjects.length)]}`, imagePath: "/button-images/button1.jpg" },
+    { text: `And then Almitra said, speak to us of ${prophetSubjects[Math.floor(Math.random() * prophetSubjects.length)]}`, imagePath: "/button-images/button2.jpg" },
+    { text: `And then Almitra said, speak to us of ${prophetSubjects[Math.floor(Math.random() * prophetSubjects.length)]}`, imagePath: "/button-images/button3.jpg" },
+  ]);
   
   // Debug helper to log state changes
   useEffect(() => {
     console.log("Response state changed:", { responseOpacity, lastResponseComplete, isLoading });
   }, [responseOpacity, lastResponseComplete, isLoading]);
+  
+  // Randomize button subjects when response fades away
+  useEffect(() => {
+    if (lastResponseComplete && responseOpacity <= 0) {
+      setRandomizedButtons([
+        { text: `And then Almitra said, speak to us of ${prophetSubjects[Math.floor(Math.random() * prophetSubjects.length)]}`, imagePath: "/button-images/button1.jpg" },
+        { text: `And then Almitra said, speak to us of ${prophetSubjects[Math.floor(Math.random() * prophetSubjects.length)]}`, imagePath: "/button-images/button2.jpg" },
+        { text: `And then Almitra said, speak to us of ${prophetSubjects[Math.floor(Math.random() * prophetSubjects.length)]}`, imagePath: "/button-images/button3.jpg" },
+      ]);
+    }
+  }, [lastResponseComplete, responseOpacity]);
 
   const { messages, input, setInput, handleSubmit, isLoading } = useChat({
     onResponse: (response) => {
@@ -247,7 +293,7 @@ export default function Chat() {
           
           {/* Buttons with images instead of text - no container border */}
           <div className="flex flex-wrap gap-5 justify-center">
-            {buttonOptions.map((option, i) => (
+            {randomizedButtons.map((option, i) => (
               <button
                 key={i}
                 type="button"
