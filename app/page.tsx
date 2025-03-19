@@ -65,6 +65,7 @@ export default function Chat() {
   const [messagePosition, setMessagePosition] = useState<"left" | "right">("right");
   const [responseOpacity, setResponseOpacity] = useState<number>(1);
   const [lastResponseComplete, setLastResponseComplete] = useState<boolean>(true);
+  const [showResetButton, setShowResetButton] = useState<boolean>(false);
   const [randomizedButtons, setRandomizedButtons] = useState([
     { text: `And then Almitra said, speak to us of ${prophetSubjects[Math.floor(Math.random() * prophetSubjects.length)]}`, imagePath: "/button-images/button1.jpg" },
     { text: `And then Almitra said, speak to us of ${prophetSubjects[Math.floor(Math.random() * prophetSubjects.length)]}`, imagePath: "/button-images/button2.jpg" },
@@ -81,6 +82,7 @@ export default function Chat() {
       // Reset response opacity when new response arrives
       setResponseOpacity(1);
       setLastResponseComplete(false);
+      setShowResetButton(false);
       
       // Set up fade-out timer for response
       setTimeout(() => {
@@ -93,6 +95,7 @@ export default function Chat() {
             // Force a delay before enabling buttons to ensure state updates properly
             setTimeout(() => {
               setLastResponseComplete(true); // Mark response as complete when it's fully faded
+              setShowResetButton(true); // Show reset button when response fades
             }, 100);
           }
         }, 250);
@@ -104,25 +107,26 @@ export default function Chat() {
   useEffect(() => {
     if (responseOpacity <= 0) {
       setLastResponseComplete(true);
+      setShowResetButton(true);
     }
   }, [responseOpacity]);
   
   // Debug helper to log state changes
   useEffect(() => {
-    console.log("Response state changed:", { responseOpacity, lastResponseComplete, isLoading });
-  }, [responseOpacity, lastResponseComplete, isLoading]);
+    console.log("Response state changed:", { responseOpacity, lastResponseComplete, isLoading, showResetButton });
+  }, [responseOpacity, lastResponseComplete, isLoading, showResetButton]);
   
-  // Randomize button subjects when response fades away
-  useEffect(() => {
-    if (lastResponseComplete && responseOpacity <= 0) {
-      setRandomizedButtons([
-        { text: `And then Almitra said, speak to us of ${prophetSubjects[Math.floor(Math.random() * prophetSubjects.length)]}`, imagePath: "/button-images/button1.jpg" },
-        { text: `And then Almitra said, speak to us of ${prophetSubjects[Math.floor(Math.random() * prophetSubjects.length)]}`, imagePath: "/button-images/button2.jpg" },
-        { text: `And then Almitra said, speak to us of ${prophetSubjects[Math.floor(Math.random() * prophetSubjects.length)]}`, imagePath: "/button-images/button3.jpg" },
-      ]);
-    }
-  }, [lastResponseComplete, responseOpacity]);
-
+  // Function to reset the interaction state
+  const handleReset = () => {
+    setRandomizedButtons([
+      { text: `And then Almitra said, speak to us of ${prophetSubjects[Math.floor(Math.random() * prophetSubjects.length)]}`, imagePath: "/button-images/button1.jpg" },
+      { text: `And then Almitra said, speak to us of ${prophetSubjects[Math.floor(Math.random() * prophetSubjects.length)]}`, imagePath: "/button-images/button2.jpg" },
+      { text: `And then Almitra said, speak to us of ${prophetSubjects[Math.floor(Math.random() * prophetSubjects.length)]}`, imagePath: "/button-images/button3.jpg" },
+    ]);
+    setLastResponseComplete(true);
+    setShowResetButton(false);
+  };
+  
   // Function to handle button clicks - simplified to ensure it always triggers a response
   const handleButtonClick = (option: string) => {
     if (isLoading || !lastResponseComplete) return; // Prevent clicks while loading or response not complete
@@ -133,6 +137,9 @@ export default function Chat() {
     
     // Start loading animation
     animateProphetMessages();
+    
+    // Hide reset button when starting new interaction
+    setShowResetButton(false);
     
     // Submit the form with a small delay to ensure everything is set
     setTimeout(() => {
@@ -214,14 +221,14 @@ export default function Chat() {
       <div className="absolute top-5 hidden w-full justify-between px-5 sm:flex">
       </div>
       
-      {/* Prophet message at the top of the page */}
+      {/* Prophet message above the welcome image */}
       {loadingMessage && (
         <div 
           className="fixed top-10 left-0 right-0 mx-auto z-50 text-center transition-opacity duration-1000 mt-8"
-          style={{ opacity: loadingOpacity, width: 'fit-content', padding: '0.5rem' }}
+          style={{ opacity: loadingOpacity }}
         >
-          <div className="whitespace-pre-line text-xl bg-white border border-black p-2">
-            {loadingMessage}
+          <div className="bg-white border border-black p-3 mx-auto inline-block">
+            <div className="whitespace-pre-line text-xl">{loadingMessage}</div>
           </div>
         </div>
       )}
@@ -229,7 +236,7 @@ export default function Chat() {
       {/* Main content area - always shown */}
       <div className="mx-5 mt-20 max-w-screen-md w-full sm:w-full relative">
         <div className="flex flex-col items-center justify-center p-7 sm:p-10">
-          {/* Welcome image */}
+          {/* Welcome image - always shown */}
           <div className="border border-black">
             <Image
               src="/welcome-image.jpg"
@@ -240,7 +247,7 @@ export default function Chat() {
             />
           </div>
           
-          {/* Message display area */}
+          {/* Message display area - conditionally positioned */}
           {chatMessages.length > 0 && chatMessages[chatMessages.length - 1].role === "assistant" && (
             <div 
               className={clsx(
@@ -258,6 +265,7 @@ export default function Chat() {
       </div>
       
       <div className="fixed bottom-0 flex w-full flex-col items-center space-y-3 bg-gradient-to-b from-transparent via-gray-100 to-gray-100 p-5 pb-3 sm:px-0">
+        {/* Removed any form borders */}
         <form
           ref={formRef}
           onSubmit={handleSubmit}
@@ -271,18 +279,21 @@ export default function Chat() {
             className="hidden"
           />
           
-          {/* Fallback button always enabled */}
-          <div className="flex justify-center mb-5">
-            <button
-              type="button"
-              className="p-2 bg-white border border-black hover:opacity-90"
-              onClick={() => handleButtonClick("kneel, gift, pray again")}
-            >
-              kneel, gift, pray again
-            </button>
-          </div>
+          {/* Reset button that appears when response vanishes */}
+          {showResetButton && (
+            <div className="flex justify-center mb-4">
+              <button
+                type="button"
+                className="bg-black text-white py-2 px-6 font-italic"
+                style={{ fontFamily: "Times New Roman, serif", fontStyle: "italic" }}
+                onClick={handleReset}
+              >
+                kneel, gift, pray ... again
+              </button>
+            </div>
+          )}
           
-          {/* Buttons with images */}
+          {/* Buttons with images instead of text - no container border */}
           <div className="flex flex-wrap gap-5 justify-center">
             {randomizedButtons.map((option, i) => (
               <button
