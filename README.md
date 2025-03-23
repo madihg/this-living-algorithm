@@ -1,5 +1,5 @@
 <a href="www.halimmadi.com">
-  <h1 align="center">This Living Lagorithm</h1>
+  <h1 align="center">This Living Algorithm</h1>
 </a>
 
 ## About
